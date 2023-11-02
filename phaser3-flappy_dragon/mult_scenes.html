@@ -1,0 +1,58 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Flappy Bird</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <script src="scenes/FlappyDragon.js"></script>
+    <script src="scenes/Welcome.js"></script>
+
+    <style>
+        body {
+            text-align: center;
+        }
+
+        canvas {
+            border: 1px solid #000000;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div id="game"></div>
+
+    <script type="text/javascript">
+        /*Global variables definition*/
+        const config = {
+            type: Phaser.CANVAS,
+            autoCenter: true,
+            width: 400, //largura da tela do jogo
+            height: 600, //altura da tela do jogo
+            backgroundColor: '#39addd',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 10 },
+                    debug: true //controla se as linhas dos limites dos objetos sao mostradas
+                }
+            },
+            parent: "game",
+            dom:{
+               createContainer: true,
+            },
+            scene: [Welcome, FlappyDragon]
+        };
+        
+        var game = new Phaser.Game(config);
+        var score = 0;
+        var playerName = '';
+        game.scene.start('Welcome', {game: game});
+        /* game.scene.start('FlappyDragon', {gameGravity: config.physics.arcade.gravity.y, 
+                                          gameWidth: config.width, gameHeight: config.height,
+                                          score: score}); */
+    </script>
+
+</body>
+</html>
