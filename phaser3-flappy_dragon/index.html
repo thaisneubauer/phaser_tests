@@ -3,7 +3,7 @@
 <head> 
     <meta charset="UTF-8" />
     <title>Flappy Bird</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser.js"></script>
 
     <style>
         body {
@@ -21,8 +21,8 @@
 
     <script type="text/javascript">
 
-        /*Global variables definition*/
-        var config = {
+        /*Definição de variáveis globais*/
+        this.config = {
             type: Phaser.AUTO,
             autoCenter: true,
             width: 400, //largura da tela do jogo
@@ -42,7 +42,7 @@
             }
         };
 
-        var game_obj = new Phaser.Game(config);
+        var game_obj = new Phaser.Game(this.config);
 
         // *** 1) FUNDO *****
         // A imagem do fundo possui 1200 de largura e 400 de altura.
@@ -74,13 +74,15 @@
             col2_obj: null
         };
 
+        // *** 3) JOGADOR *****
         var player = {
             width: 170,
             height: 133,
             obj: null
         };
 
-        var game = {
+        // *** 4) CONTROLES DA RODADA *****
+        var gameControls = {
             over: false,
             current_col_scored: false,
             score: 0,
@@ -90,30 +92,21 @@
 
         /*******************************/
 
-        function preload ()
-        {
+        function preload(){
             this.load.image('bg', 'img/fundo.png');
-            //this.load.image('dragon1', 'img/dragao1.png');
             this.load.spritesheet('dragon', 'img/dragao.png', { frameWidth: player.width, frameHeight: player.height });
             this.load.image('col_bottom', 'img/coluna_bottom.png');
             this.load.image('col_upper', 'img/coluna_upper.png');
             this.load.image('game_over', 'img/gameover.png');
         }
 
-        function create ()
-        {
-            //Adiciona a imagem de fundo e a salva na chave "obj" da variável "bg"
+
+        function create(){
+            /*Adiciona a imagem de fundo e a salva na chave "obj" da variável "bg"*/
             bg.obj = this.add.image(bg.x, bg.y, 'bg').setOrigin(0,0);
-        
 
-            //Adiciona imagens das colunas
-            //cols_group = this.physics.add.group();
-            //cols_group.create(cols.x, cols.y, 'col_upper').setOrigin(0,0);
-            //cols_group.create(cols.x, cols.y + cols.height + cols.space, 'col_bottom').setOrigin(0,0);
-            //cols_group.setVelocityX(-cols.speed);
-            //cols_group.setVImmovable(true);
-            //cols_group.allowGravity(false);
 
+            /*Adiciona imagens das colunas*/
             cols.col1_obj = this.add.image(cols.x, cols.y, 'col_upper').setOrigin(0,0);
             cols.col2_obj = this.add.image(cols.x, cols.y + cols.height + cols.space, 'col_bottom').setOrigin(0,0);
             this.physics.add.existing(cols.col1_obj);
@@ -123,49 +116,43 @@
             cols.col1_obj.body.setVelocityX(-cols.speed); 
             cols.col2_obj.body.setVelocityX(-cols.speed); 
 
-
-            //cols.col1_obj = this.physics.add.image(cols.x, cols.y, 'col_upper').setOrigin(0,0);
-            //cols.col2_obj = this.physics.add.image(cols.x, cols.y + cols.height + cols.space, 'col_bottom').setOrigin(0,0);
-            //Comentário sobre a não utilização das linhas acima:  
-            //adicionando a imagem diretamente nos physics bagunça a localização dos limites de colisão das colunas
-
-            //Adiciona jogador e suas propriedades físicas
+            /*Adiciona jogador e suas propriedades físicas*/
             player.obj = this.physics.add.sprite(170, 130, 'dragon').setScale(.8);
             player.obj.body.setSize(50,80,true);
             player.obj.setCollideWorldBounds(true);
 
 
-            //Adiciona animação da imagem do jogador
+            /*Adiciona animação da imagem do jogador*/
             this.anims.create({
                 key: 'fly',
                 frames: this.anims.generateFrameNumbers('dragon', { start: 0, end: 2 }),
                 frameRate: 10,
                 repeat: -1
             });
-            //Adiciona a animação do movimento do jogador
+            /*Adiciona a animação do movimento do jogador*/
             player.obj.anims.play('fly');
 
-            //Adiciona os cursores que movimentarão o jogador
+            /*Adiciona os cursores que movimentarão o jogador*/
             cursors = this.input.keyboard.createCursorKeys();
 
-            //Adiciona os monitores de colisão
+            /*Adiciona os monitores de colisão*/
             this.physics.add.overlap(player.obj, cols.col1_obj, hitCol, null, this);
             this.physics.add.overlap(player.obj, cols.col2_obj, hitCol, null, this);
 
-            //Mostrar o placar
-            scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '20px', fill: '#000' });
-            game.restartText = this.add.text(15, config.height/2+100, game.restartMessage, 
+            /*Mostrar o placar*/
+            scoreText = this.add.text(15, 15, 'score: 0', { fontSize: '20px', fill: '#000' });
+            gameControls.restartText = this.add.text(15, config.height - 50, gameControls.restartMessage, 
                                         { fontSize: '20px', fill: 'white', backgroundColor: 'black'});
-            game.restartText.visible = false;
+            gameControls.restartText.visible = false;
         }
 
-        function update ()
-        {
+
+        function update(){
             /*Controla se o jogo acabou e se a tecla que o reinicia foi acionada*/
-            if (game.over){
+            if (gameControls.over){
                 if (cursors.shift.isDown){
-                    game.over = false;
-                    game.score = 0;
+                    gameControls.over = false;
+                    gameControls.score = 0;
                     cols.x = - cols.width -1;
                     this.scene.restart();
                 }
@@ -182,7 +169,17 @@
 
             /*Atualiza posicao das colunas*/
             cols.x = cols.col1_obj.x
-            controlColsPositions();
+            if (cols.x < - cols.width){
+                cols.x = Phaser.Math.FloatBetween(cols.min_x, cols.max_x); // sorteia o intervalo antes das próximas colunas
+                cols.col1_obj.x = cols.x
+                cols.col2_obj.x = cols.x
+
+                cols.y = Phaser.Math.FloatBetween(cols.min_y, cols.max_y); // sorteia a posição vertical
+                cols.col1_obj.y = cols.y;
+                cols.col2_obj.y = cols.y + cols.height + cols.space;
+
+                gameControls.current_col_scored = false;
+            }
 
             /*Inclui controle de movimentação do dragao*/
             if (cursors.left.isDown)
@@ -196,38 +193,24 @@
 
 
             /*Verifica se o jogador passou pelas colunas*/
-            if (!game.current_col_scored){
+            if (!gameControls.current_col_scored){
                 if (player.obj.x - player.width/2 > cols.x + cols.width){
-                    game.score++;
-                    game.current_col_scored = true;
-                    scoreText.setText('score: ' + game.score);
+                    gameControls.score++;
+                    gameControls.current_col_scored = true;
+                    scoreText.setText( 'score: ' + gameControls.score);
                 }
             }
         }
 
+
         function hitCol(player_obj, col_obj){
             this.physics.pause();
-            player_obj.anims.stop('fly');
-            player_obj.setTint(0xff0000);
-            game.over = true;
+            player.obj.anims.stop('fly');
+            player.obj.setTint(0xff0000);
+            gameControls.over = true;
             this.add.image(config.width/2, config.height/2, 'game_over').setScale(.5);
-            game.restartText.visible = true;
+            gameControls.restartText.visible = true;
         }
-
-        function controlColsPositions(){
-            if (cols.x < - cols.width){
-                cols.x = Phaser.Math.FloatBetween(cols.min_x, cols.max_x); // sorteia o intervalo antes das próximas colunas
-                cols.col1_obj.x = cols.x
-                cols.col2_obj.x = cols.x
-
-                cols.y = Phaser.Math.FloatBetween(cols.min_y, cols.max_y); // sorteia a posição vertical
-                cols.col1_obj.y = cols.y;
-                cols.col2_obj.y = cols.y + cols.height + cols.space;
-
-                game.current_col_scored = false;
-            }
-        }
-
     </script>
 
 </body>

@@ -9,10 +9,6 @@ class Welcome extends Phaser.Scene {
         });
     }
 
-    init(data){
-        this.game = data.game;
-    }
-
 
     preload(){
         this.load.html("form", "aux/form.html");
@@ -21,39 +17,75 @@ class Welcome extends Phaser.Scene {
 
     create(){
 
-        this.message = this.add.text(200, 200, "Hello, --", {
-            color: "#FFFFFF",
-            fontSize: 40,
-            fontStyle: "bold"
-        }).setOrigin(0.5);
-
+        this.cursors = this.input.keyboard.createCursorKeys();
         this.returnKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-        //this.add.dom(100,100).createFromHTML('<h1>Teste</h1>');
-        //this.nameInput = this.add.dom(100, 100).createFromCache("form");
-        //var html = '<div id="input-form"><input type="text" name="name" placeholder="Full Name" /></div>';
-        //this.nameInput = this.add.dom(100, 100).createFromHTML(html);
-        const element = this.add.dom(100, 100).createFromCache('form');
-        //var elem = this.add.dom("input");
-        //elem.id ='teste';
-        //var data = this.cache.html.get('form');
 
-        this.returnKey.on("down", event => {
-            let name = this.nameInput.getChildByName("name");
-            if(name.value != "") {
-                this.message.setText("Hello, " + name.value);
-                name.value = "";
+        this.nameFilled = false;
+        var text = {height: 20, padding: 15, content: "Hello --"}
+
+        this.message = this.add.text(
+            this.game.config.width/2, 
+            this.game.config.height/2 - text.padding*2 - text.height,
+            text.content, {
+                color: "#FFFFFF",
+                fontSize: 40,
+                fontStyle: "bold"
             }
+        ).setOrigin(0.5);
+
+        
+        //var html = '<input type="text" name="name" placeholder="Your name" />';
+        //this.nameInput = this.add.dom(300, 200).createFromHTML(html).setOrigin(0,0);
+        var inputSize = {width: 270, height: 42, padding: 15}; //input size including margins and paddings    
+        var inputButton = {width: 30, height: 12};
+        var inputCoords = {
+            xposition: (this.game.config.width-inputSize.width)/2 - inputButton.width,
+            yposition: (this.game.config.height-inputSize.height-inputSize.padding*2)/2,
+        };  
+
+       this.inputName = this.add.dom(inputCoords.xposition, inputCoords.yposition).createFromCache('form').setOrigin(0,0);
+        
+       const nameOkTextButton = this.add.text(
+            inputCoords.xposition + inputSize.width + 13, 
+            //padding desse elemento + aproximadamente 3 pixels do caracter ">" utilizado no tamanho de fonte escolhido
+            inputCoords.yposition + inputButton.height + 2, ">", 
+            {backgroundColor: "#8ecbf4", fontSize: 18, padding: 10}
+        )
+        nameOkTextButton.setInteractive();
+        
+        this.returnKey.on("down", event => {
+            this.updateName(this.inputName);
         });
+
+        nameOkTextButton.on('pointerdown', () => {
+            this.updateName(this.inputName);
+        })
+
+        var message = "Pressione SHIFT para iniciar o jogo";
+        this.startGameMessage = this.add.text(
+            (this.game.config.width - message.length + 30)/2, this.game.config.height - 100, 
+            message, 
+            { fontSize: '15px', fill: 'white', backgroundColor: 'black'}
+        ).setOrigin(0.5).setVisible(false);
     }
 
 
     update(){
-        if (this.returnKey.isDown){
-            this.scene.start('FlappyDragon', {gameGravity: config.physics.arcade.gravity.y, 
-                gameWidth: config.width, gameHeight: config.height,
-                score: score});
+        if (this.cursors.shift.isDown && this.nameFilled){
+            this.game.highScore = 0
+            this.scene.start('FlappyDragon', this.game);
             return
         }
     }
 
+
+    updateName(inputNameElement){
+        let name = inputNameElement.getChildByName("name");
+            if(name.value != "") {
+                this.message.setText("Hello " + name.value);
+                this.startGameMessage.setVisible(true);
+                this.nameFilled = true;
+                this.game.name = name.value;
+            }
+    }
 }

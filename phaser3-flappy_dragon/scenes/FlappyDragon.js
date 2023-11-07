@@ -15,13 +15,7 @@ class FlappyDragon extends Phaser.Scene {
     }
 
 
-    init(data){
-        this.gameGravity = data.gameGravity;
-        this.gameWidth = data.gameWidth;
-        this.gameHeight = data.gameHeight;
-
-        this.cursors;
-
+    init(){
         // *** 1) FUNDO *****
         // A imagem do fundo possui 1200 de largura e 400 de altura.
         // Mas somente uma janela de 400x400 é exibida por vez.
@@ -52,13 +46,15 @@ class FlappyDragon extends Phaser.Scene {
             col2_obj: null
         };
 
+        // *** 3) JOGADOR *****
         this.player = {
             width: 170,
             height: 133,
             obj: null
         };
 
-        this.game = {
+        // *** 4) CONTROLES DA RODADA *****
+        this.gameControls = {
             over: false,
             current_col_scored: false,
             score: 0,
@@ -71,7 +67,6 @@ class FlappyDragon extends Phaser.Scene {
     preload ()
     {
         this.load.image('bg', 'img/fundo.png');
-        //this.load.image('dragon1', 'img/dragao1.png');
         this.load.spritesheet('dragon', 'img/dragao.png', { frameWidth: this.player.width, frameHeight: this.player.height });
         this.load.image('col_bottom', 'img/coluna_bottom.png');
         this.load.image('col_upper', 'img/coluna_upper.png');
@@ -81,18 +76,11 @@ class FlappyDragon extends Phaser.Scene {
 
     create ()
     {
-        //Adiciona a imagem de fundo e a salva na chave "obj" da variável "bg"
+        /*Adiciona a imagem de fundo e a salva na chave "obj" da variável "bg"*/
         this.bg.obj = this.add.image(this.bg.x, this.bg.y, 'bg').setOrigin(0,0);
 
 
-        //Adiciona imagens das colunas
-        //cols_group = this.physics.add.group();
-        //cols_group.create(cols.x, cols.y, 'col_upper').setOrigin(0,0);
-        //cols_group.create(cols.x, cols.y + cols.height + cols.space, 'col_bottom').setOrigin(0,0);
-        //cols_group.setVelocityX(-cols.speed);
-        //cols_group.setVImmovable(true);
-        //cols_group.allowGravity(false);
-
+        /*Adiciona imagens das colunas*/
         this.cols.col1_obj = this.add.image(this.cols.x, this.cols.y, 'col_upper').setOrigin(0,0);
         this.cols.col2_obj = this.add.image(this.cols.x, this.cols.y + this.cols.height + this.cols.space, 'col_bottom').setOrigin(0,0);
         this.physics.add.existing(this.cols.col1_obj);
@@ -102,50 +90,46 @@ class FlappyDragon extends Phaser.Scene {
         this.cols.col1_obj.body.setVelocityX(-this.cols.speed); 
         this.cols.col2_obj.body.setVelocityX(-this.cols.speed); 
 
-
-        //cols.col1_obj = this.physics.add.image(cols.x, cols.y, 'col_upper').setOrigin(0,0);
-        //cols.col2_obj = this.physics.add.image(cols.x, cols.y + cols.height + cols.space, 'col_bottom').setOrigin(0,0);
-        //Comentário sobre a não utilização das linhas acima:  
-        //adicionando a imagem diretamente nos physics bagunça a localização dos limites de colisão das colunas
-
-        //Adiciona jogador e suas propriedades físicas
+        /*Adiciona jogador e suas propriedades físicas*/
         this.player.obj = this.physics.add.sprite(170, 130, 'dragon').setScale(.8);
         this.player.obj.body.setSize(50,80,true);
         this.player.obj.setCollideWorldBounds(true);
 
 
-        //Adiciona animação da imagem do jogador
+        /*Adiciona animação da imagem do jogador*/
         this.anims.create({
             key: 'fly',
             frames: this.anims.generateFrameNumbers('dragon', { start: 0, end: 2 }),
             frameRate: 10,
             repeat: -1
         });
-        //Adiciona a animação do movimento do jogador
+        /*Adiciona a animação do movimento do jogador*/
         this.player.obj.anims.play('fly');
 
-        //Adiciona os cursores que movimentarão o jogador
+        /*Adiciona os cursores que movimentarão o jogador*/
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        //Adiciona os monitores de colisão
+        /*Adiciona os monitores de colisão*/
         this.physics.add.overlap(this.player.obj, this.cols.col1_obj, this.hitCol, null, this);
         this.physics.add.overlap(this.player.obj, this.cols.col2_obj, this.hitCol, null, this);
 
-        //Mostrar o placar
-        this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '20px', fill: '#000' });
-        this.game.restartText = this.add.text(15, this.gameHeight/2+100, this.game.restartMessage, 
+        /*Mostrar o placar*/
+        this.scoreText = this.add.text(15, 15, this.game.name + ': 0', { fontSize: '20px', fill: '#000' });
+        this.highScoreText = this.add.text(0, 15, 'high score: ' + this.game.highScore, { fontSize: '20px', fill: '#000', align: 'right'});
+        this.highScoreText.x = this.game.config.width - this.highScoreText.width - 15
+        this.gameControls.restartText = this.add.text(15, this.game.config.height - 50, this.gameControls.restartMessage, 
                                     { fontSize: '20px', fill: 'white', backgroundColor: 'black'});
-        this.game.restartText.visible = false;
+        this.gameControls.restartText.visible = false;
     }
 
 
     update ()
     {
         /*Controla se o jogo acabou e se a tecla que o reinicia foi acionada*/
-        if (this.game.over){
+        if (this.gameControls.over){
             if (this.cursors.shift.isDown){
-                this.game.over = false;
-                this.game.score = 0;
+                this.gameControls.over = false;
+                this.gameControls.score = 0;
                 this.cols.x = - this.cols.width -1;
                 this.scene.restart();
             }
@@ -171,26 +155,26 @@ class FlappyDragon extends Phaser.Scene {
             this.cols.col1_obj.y = this.cols.y;
             this.cols.col2_obj.y = this.cols.y + this.cols.height + this.cols.space;
 
-            this.game.current_col_scored = false;
+            this.gameControls.current_col_scored = false;
         }
 
         /*Inclui controle de movimentação do dragao*/
         if (this.cursors.left.isDown)
-        this.player.obj.setX(this.player.obj.x-5);
+            this.player.obj.setX(this.player.obj.x-5);
         else if (this.cursors.right.isDown)
-        this.player.obj.setX(this.player.obj.x+5);
+            this.player.obj.setX(this.player.obj.x+5);
         else if (this.cursors.up.isDown)
-        this.player.obj.setY(this.player.obj.y-this.gameGravity);
+            this.player.obj.setY(this.player.obj.y-this.game.config.physics.arcade.gravity.y);
         else if (this.cursors.down.isDown)
-        this.player.obj.setY(this.player.obj.y+this.gameGravity);
+            this.player.obj.setY(this.player.obj.y+this.game.config.physics.arcade.gravity.y);
 
 
         /*Verifica se o jogador passou pelas colunas*/
-        if (!this.game.current_col_scored){
+        if (!this.gameControls.current_col_scored){
             if (this.player.obj.x - this.player.width/2 > this.cols.x + this.cols.width){
-                this.game.score++;
-                this.game.current_col_scored = true;
-                this.scoreText.setText('score: ' + this.game.score);
+                this.gameControls.score++;
+                this.gameControls.current_col_scored = true;
+                this.scoreText.setText( this.game.name + ': ' + this.gameControls.score);
             }
         }
     }
@@ -200,9 +184,13 @@ class FlappyDragon extends Phaser.Scene {
         this.physics.pause();
         this.player.obj.anims.stop('fly');
         this.player.obj.setTint(0xff0000);
-        this.game.over = true;
-        this.add.image(this.gameWidth/2, this.gameHeight/2, 'game_over').setScale(.5);
-        this.game.restartText.visible = true;
+        this.gameControls.over = true;
+        this.add.image(this.game.config.width/2, this.game.config.height/2, 'game_over').setScale(.5);
+        this.gameControls.restartText.visible = true;
+        if (this.gameControls.score > this.game.highScore){
+            this.game.highScore = this.gameControls.score;
+            this.highScoreText.setText('high score: ' +this.game.highScore);
+        }
     }
 
 }
