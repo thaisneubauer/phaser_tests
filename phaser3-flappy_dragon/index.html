@@ -134,6 +134,7 @@
 
             /*Adiciona os cursores que movimentarão o jogador*/
             cursors = this.input.keyboard.createCursorKeys();
+            pointer = this.input.activePointer;
 
             /*Adiciona os monitores de colisão*/
             this.physics.add.overlap(player.obj, cols.col1_obj, hitCol, null, this);
@@ -186,7 +187,7 @@
                 player.obj.setX(player.obj.x-5);
             else if (cursors.right.isDown)
                 player.obj.setX(player.obj.x+5);
-            else if (cursors.up.isDown)
+            else if (cursors.up.isDown || cursors.space.isDown || pointer.isDown)
                 player.obj.setY(player.obj.y-config.physics.arcade.gravity.y);
             else if (cursors.down.isDown)
                 player.obj.setY(player.obj.y+config.physics.arcade.gravity.y);

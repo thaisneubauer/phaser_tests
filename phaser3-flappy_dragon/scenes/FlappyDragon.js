@@ -108,6 +108,7 @@ class FlappyDragon extends Phaser.Scene {
 
         /*Adiciona os cursores que movimentarão o jogador*/
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.pointer = this.input.activePointer;
 
         /*Adiciona os monitores de colisão*/
         this.physics.add.overlap(this.player.obj, this.cols.col1_obj, this.hitCol, null, this);
@@ -163,7 +164,7 @@ class FlappyDragon extends Phaser.Scene {
             this.player.obj.setX(this.player.obj.x-5);
         else if (this.cursors.right.isDown)
             this.player.obj.setX(this.player.obj.x+5);
-        else if (this.cursors.up.isDown)
+        else if (this.cursors.up.isDown || this.cursors.space.isDown || this.pointer.isDown)
             this.player.obj.setY(this.player.obj.y-this.game.config.physics.arcade.gravity.y);
         else if (this.cursors.down.isDown)
             this.player.obj.setY(this.player.obj.y+this.game.config.physics.arcade.gravity.y);
