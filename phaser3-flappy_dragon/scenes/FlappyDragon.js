@@ -58,8 +58,7 @@ class FlappyDragon extends Phaser.Scene {
             over: false,
             current_col_scored: false,
             score: 0,
-            restartText: null,
-            restartMessage: 'Pressione SHIFT para reiniciar',
+            restartBt: null
         }; 
     }
 
@@ -68,9 +67,10 @@ class FlappyDragon extends Phaser.Scene {
     {
         this.load.image('bg', 'img/fundo.png');
         this.load.spritesheet('dragon', 'img/dragao.png', { frameWidth: this.player.width, frameHeight: this.player.height });
-        this.load.image('col_bottom', 'img/coluna_bottom.png');
-        this.load.image('col_upper', 'img/coluna_upper.png');
-        this.load.image('game_over', 'img/gameover.png');
+        this.load.image('colBottom', 'img/coluna_bottom.png');
+        this.load.image('colUpper', 'img/coluna_upper.png');
+        this.load.image('gameOver', 'img/gameover.png');
+        this.load.image('restart', 'img/restart_bt.png')
     }
 
 
@@ -81,8 +81,8 @@ class FlappyDragon extends Phaser.Scene {
 
 
         /*Adiciona imagens das colunas*/
-        this.cols.col1_obj = this.add.image(this.cols.x, this.cols.y, 'col_upper').setOrigin(0,0);
-        this.cols.col2_obj = this.add.image(this.cols.x, this.cols.y + this.cols.height + this.cols.space, 'col_bottom').setOrigin(0,0);
+        this.cols.col1_obj = this.add.image(this.cols.x, this.cols.y, 'colUpper').setOrigin(0,0);
+        this.cols.col2_obj = this.add.image(this.cols.x, this.cols.y + this.cols.height + this.cols.space, 'colBottom').setOrigin(0,0);
         this.physics.add.existing(this.cols.col1_obj);
         this.physics.add.existing(this.cols.col2_obj);
         this.cols.col1_obj.body.allowGravity = false; 
@@ -118,25 +118,28 @@ class FlappyDragon extends Phaser.Scene {
         this.scoreText = this.add.text(15, 15, this.game.name + ': 0', { fontSize: '20px', fill: '#000' });
         this.highScoreText = this.add.text(0, 15, 'high score: ' + this.game.highScore, { fontSize: '20px', fill: '#000', align: 'right'});
         this.highScoreText.x = this.game.config.width - this.highScoreText.width - 15
-        this.gameControls.restartText = this.add.text(15, this.game.config.height - 50, this.gameControls.restartMessage, 
-                                    { fontSize: '20px', fill: 'white', backgroundColor: 'black'});
-        this.gameControls.restartText.visible = false;
-    }
+        this.gameControls.restartBt = this.add.image(this.game.config.width/2-50, this.game.config.height/4*3, 
+                                                    'restart').setScale(.2).setOrigin(0,0).setInteractive().setVisible(false);
 
-
-    update ()
-    {
-        /*Controla se o jogo acabou e se a tecla que o reinicia foi acionada*/
-        if (this.gameControls.over){
-            if (this.cursors.shift.isDown){
+        this.gameControls.restartBt.on('pointerdown', function(){
+            /*Controla se o jogo acabou e se a tecla que o botão de reiniciar foi acionado*/
+            if(this.gameControls.over){
                 this.gameControls.over = false;
                 this.gameControls.score = 0;
                 this.cols.x = - this.cols.width -1;
                 this.scene.restart();
             }
-            return 
-        }
-            
+        },this)
+    }
+
+
+    update ()
+    {        
+        /*Controla se o jogo acabou e paraliza a cena (interrompendo a execução de "update")*/
+        if(this.gameControls.over){
+            return
+        }  
+
         /*Atualiza a posicao da imagem de fundo*/
         this.bg.x--;
         if (this.bg.x < this.bg.x_end){
@@ -186,8 +189,8 @@ class FlappyDragon extends Phaser.Scene {
         this.player.obj.anims.stop('fly');
         this.player.obj.setTint(0xff0000);
         this.gameControls.over = true;
-        this.add.image(this.game.config.width/2, this.game.config.height/2, 'game_over').setScale(.5);
-        this.gameControls.restartText.visible = true;
+        this.add.image(this.game.config.width/2, this.game.config.height/2, 'gameOver').setScale(.5);
+        this.gameControls.restartBt.visible = true;
         if (this.gameControls.score > this.game.highScore){
             this.game.highScore = this.gameControls.score;
             this.highScoreText.setText('high score: ' +this.game.highScore);

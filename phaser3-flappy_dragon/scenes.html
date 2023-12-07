@@ -9,9 +9,8 @@
 
     <style>
         body {
-            text-align: center;
-            display: grid;
-            justify-items: center;
+            margin-top: 1px;
+            padding: 0;
         }
 
         canvas {
@@ -29,7 +28,10 @@
         /*Global variables definition*/
         const config = {
             type: Phaser.AUTO,
-            mode: Phaser.Scale.FIT,
+            scale: {
+                mode: Phaser.Scale.FIT
+            },
+            autoCenter: Phaser.Scale.CENTER,
             width: 400, //largura da tela do jogo
             height: 600, //altura da tela do jogo
             backgroundColor: '#39addd',

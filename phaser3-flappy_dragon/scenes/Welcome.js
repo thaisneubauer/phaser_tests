@@ -12,6 +12,7 @@ class Welcome extends Phaser.Scene {
 
     preload(){
         this.load.html("form", "aux/form.html");
+        this.load.image("play", "img/play_bt.png")
     }
 
 
@@ -61,21 +62,20 @@ class Welcome extends Phaser.Scene {
             this.updateName(this.inputName);
         })
 
-        var message = "Pressione SHIFT para iniciar o jogo";
-        this.startGameMessage = this.add.text(
-            (this.game.config.width - message.length + 30)/2, this.game.config.height - 100, 
-            message, 
-            { fontSize: '15px', fill: 'white', backgroundColor: 'black'}
-        ).setOrigin(0.5).setVisible(false);
+        this.playBt = this.add.image(this.game.config.width/2-50, this.game.config.height/4*3,'play')
+                              .setScale(.2).setOrigin(0,0).setInteractive().setVisible(false);
+        
+        this.playBt.on('pointerdown', function() {
+            if(this.nameFilled){
+                this.game.highScore = 0
+                this.scene.start('FlappyDragon', this.game);
+            }
+        }, this);
     }
 
 
     update(){
-        if (this.cursors.shift.isDown && this.nameFilled){
-            this.game.highScore = 0
-            this.scene.start('FlappyDragon', this.game);
-            return
-        }
+        return
     }
 
 
@@ -83,7 +83,7 @@ class Welcome extends Phaser.Scene {
         let name = inputNameElement.getChildByName("name");
             if(name.value != "") {
                 this.message.setText("Hello " + name.value);
-                this.startGameMessage.setVisible(true);
+                this.playBt.setVisible(true);
                 this.nameFilled = true;
                 this.game.name = name.value;
             }

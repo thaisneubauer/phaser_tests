@@ -1,7 +1,10 @@
+
+
 #input-form {
     padding: 15px;
     max-width: 270px;
     overflow: visible;
+    position: auto;
 }
 
 #input-form input{
@@ -11,11 +14,11 @@
     border-style: none;
     background-color: #8ecbf4;
     color: #ffffff;
-    overflow: visible;              
+    overflow: visible;
 }
 
 ::placeholder {
-    color:   #ffffff;
+    color:    rgb(225, 227, 198);
 }
 
 textarea:focus, input:focus{
